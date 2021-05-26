@@ -14,7 +14,7 @@ from midas.midas_net_custom import MidasNet_small
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
 
 
-def run(input_path, output_path, model_path, model_type="large", optimize=True):
+def run(input_path, output_path, model_path, model_type="large", optimize=True, sidebyside=False):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -136,7 +136,11 @@ def run(input_path, output_path, model_path, model_type="large", optimize=True):
         filename = os.path.join(
             output_path, os.path.splitext(os.path.basename(img_name))[0]
         )
-        utils.write_depth(filename, prediction, bits=2)
+        
+        if sidebyside==True:
+            utils.write_color_depth(img_name, filename, prediction)       
+        else:
+            utils.write_depth(filename, prediction, bits=2)
 
     print("finished")
 
@@ -167,6 +171,8 @@ if __name__ == "__main__":
     parser.add_argument('--optimize', dest='optimize', action='store_true')
     parser.add_argument('--no-optimize', dest='optimize', action='store_false')
     parser.set_defaults(optimize=True)
+    parser.add_argument('--sidebyside', dest='sidebyside', action='store_true')
+    parser.set_defaults(sidebyside=False)
 
     args = parser.parse_args()
 
@@ -185,4 +191,4 @@ if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
 
     # compute depth maps
-    run(args.input_path, args.output_path, args.model_weights, args.model_type, args.optimize)
+    run(args.input_path, args.output_path, args.model_weights, args.model_type, args.optimize, args.sidebyside)

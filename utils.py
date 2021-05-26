@@ -188,3 +188,27 @@ def write_depth(path, depth, bits=1):
         cv2.imwrite(path + ".png", out.astype("uint16"))
 
     return
+    
+# write color and depth side by side for Looking Glass
+def write_color_depth(img_name, path, depth):    
+    # read sourc image in color        
+    inputImg = cv2.imread(img_name)
+    
+    # convert depth to grayscale
+    depth_min = depth.min()
+    depth_max = depth.max()
+
+    if depth_max - depth_min > np.finfo("float").eps:
+        out = 255 * (depth - depth_min) / (depth_max - depth_min)
+    else:
+        out = np.zeros(depth.shape, dtype=depth.type)   
+
+    # convert to uint8 and RGB
+    depthGray = cv2.cvtColor(out.astype("uint8"), cv2.COLOR_GRAY2RGB)
+    
+    # concatenate color and depth horizontally
+    im_h = cv2.hconcat([inputImg, depthGray])
+    
+    # output
+    cv2.imwrite(path + "_RGBD.png", im_h)
+    return
